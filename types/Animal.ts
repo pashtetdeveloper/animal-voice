@@ -1,8 +1,6 @@
-@@ .. @@
- export interface Animal {
-   id: number;
-   name: string;
--  image: string;
-+  image: any;
-   sound: string;
- }
+export interface Animal {
+  id: number;
+  name: string;
+  image: string;
+  sound: string;
+}

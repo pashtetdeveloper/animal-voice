@@ -1,32 +1,25 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Image } from 'expo-image';
 import { StatusBar } from 'expo-status-bar';
+import React, { useState } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { allAnimals } from '../data/animals';
+import { Animal } from '../types/Animal';
 
-const animals = [
-  {
-    id: 1,
-    name: 'Cat',
-    image: 'https://images.pexels.com/photos/45201/kitty-cat-kitten-pet-45201.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop',
-    sound: '🐱 Meow!'
-  },
-  {
-    id: 2,
-    name: 'Deer',
-    image: 'https://images.pexels.com/photos/247376/pexels-photo-247376.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop',
-    sound: '🦌 Snort!'
-  },
-  {
-    id: 3,
-    name: 'Horse',
-    image: 'https://images.pexels.com/photos/635499/pexels-photo-635499.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop',
-    sound: '🐴 Neigh!'
-  }
-];
+const getRandomAnimals = (): Animal[] => {
+  const shuffled = [...allAnimals].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, 3);
+};
 
 export default function Index() {
-  const [selectedAnimal, setSelectedAnimal] = useState(null);
+  const [animals, setAnimals] = useState<Animal[]>(() => getRandomAnimals());
+  const [selectedAnimal, setSelectedAnimal] = useState<Animal | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+
+  const loadNewAnimals = () => {
+    setAnimals(getRandomAnimals());
+    setSelectedAnimal(null);
+  };
 
   const playAnimalSound = () => {
     if (selectedAnimal) {
@@ -40,13 +33,16 @@ export default function Index() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar style="dark" />
-      
+      <StatusBar style='dark' />
+
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.flagContainer}>
           <Text style={styles.flag}>🇺🇦</Text>
         </View>
+        <TouchableOpacity onPress={loadNewAnimals} style={styles.refreshButton}>
+          <Text style={styles.refreshIcon}>🔄</Text>
+        </TouchableOpacity>
         <View style={styles.counterContainer}>
           <Text style={styles.counterText}>34</Text>
         </View>
@@ -55,21 +51,17 @@ export default function Index() {
       {/* Main Content */}
       <View style={styles.mainContent}>
         {/* Play Button */}
-        <TouchableOpacity 
-          style={[styles.playButton, isPlaying && styles.playButtonActive]} 
+        <TouchableOpacity
+          style={[styles.playButton, isPlaying && styles.playButtonActive]}
           onPress={playAnimalSound}
           disabled={!selectedAnimal}
         >
-          <Text style={styles.playIcon}>
-            {isPlaying ? '⏸️' : '▶️'}
-          </Text>
+          <Text style={styles.playIcon}>{isPlaying ? '⏸️' : '▶️'}</Text>
         </TouchableOpacity>
 
         {/* Selected Animal Sound Text */}
         {selectedAnimal && (
-          <Text style={styles.soundText}>
-            {selectedAnimal.sound}
-          </Text>
+          <Text style={styles.soundText}>{selectedAnimal.sound}</Text>
         )}
       </View>
 
@@ -80,18 +72,20 @@ export default function Index() {
             key={animal.id}
             style={[
               styles.animalButton,
-              selectedAnimal?.id === animal.id && styles.selectedAnimal
+              selectedAnimal?.id === animal.id && styles.selectedAnimal,
             ]}
             onPress={() => setSelectedAnimal(animal)}
           >
-            <Image source={{ uri: animal.image }} style={styles.animalImage} />
+            <Image source={animal.image} style={styles.animalImage} />
           </TouchableOpacity>
         ))}
       </View>
 
       {/* Instructions */}
       <Text style={styles.instructions}>
-        {selectedAnimal ? `Tap play to hear the ${selectedAnimal.name.toLowerCase()}!` : 'Select an animal above'}
+        {selectedAnimal
+          ? `Tap play to hear the ${selectedAnimal.name.toLowerCase()}!`
+          : 'Select an animal above'}
       </Text>
     </SafeAreaView>
   );
@@ -125,6 +119,22 @@ const styles = StyleSheet.create({
   },
   flag: {
     fontSize: 24,
+  },
+  refreshButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  refreshIcon: {
+    fontSize: 20,
   },
   counterContainer: {
     width: 40,
